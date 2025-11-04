@@ -1,60 +1,51 @@
-function calculateSubnet() {
-    const ipInput = document.getElementById("ipAddress").value.trim();
-    const maskInput = document.getElementById("subnetMask").value.trim();
-    const outputDiv = document.getElementById("output");
-    outputDiv.innerHTML = "";
+function calculate() {
+    const ip = document.getElementById("ip").value.trim();
+    const mask = document.getElementById("mask").value.trim();
+    const resultDiv = document.getElementById("result");
+    resultDiv.innerHTML = "";
 
-    // Validate IP format
-    const ipPattern = /^(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)$/;
-    if (!ipPattern.test(ipInput)) {
-        outputDiv.innerHTML = `<p style="color:red;">❌ Invalid IP address format.</p>`;
+    const ipPattern = /^(25[0-5]|2[0-4]\d|[01]?\d\d?)(\.(25[0-5]|2[0-4]\d|[01]?\d\d?)){3}$/;
+    if (!ipPattern.test(ip)) {
+        resultDiv.innerHTML = "<p style='color:red'>Invalid IP address</p>";
         return;
     }
 
-    // Handle mask as CIDR or dotted decimal
+    // Convert subnet mask to CIDR
     let cidr = 0;
-    if (maskInput.includes("/")) {
-        cidr = parseInt(maskInput.replace("/", ""));
-    } else if (ipPattern.test(maskInput)) {
-        const maskOctets = maskInput.split(".").map(o => parseInt(o));
-        const maskBinary = maskOctets.map(o => o.toString(2).padStart(8, "0")).join("");
-        cidr = maskBinary.split("1").length - 1;
-    } else if (!isNaN(maskInput)) {
-        cidr = parseInt(maskInput);
+    if (mask.includes("/")) {
+        cidr = parseInt(mask.replace("/", ""));
+    } else if (ipPattern.test(mask)) {
+        const maskBin = mask.split(".").map(o => parseInt(o).toString(2).padStart(8, "0")).join("");
+        cidr = maskBin.split("1").length - 1;
     } else {
-        outputDiv.innerHTML = `<p style="color:red;">❌ Invalid subnet mask or CIDR.</p>`;
+        resultDiv.innerHTML = "<p style='color:red'>Invalid subnet mask</p>";
         return;
     }
 
     if (cidr < 1 || cidr > 32) {
-        outputDiv.innerHTML = `<p style="color:red;">❌ CIDR must be between 1 and 32.</p>`;
+        resultDiv.innerHTML = "<p style='color:red'>CIDR must be between 1 and 32</p>";
         return;
     }
 
-    // Convert IP to 32-bit binary
-    const ipBinary = ipInput.split(".").map(o => parseInt(o).toString(2).padStart(8, "0")).join("");
-    const networkBinary = ipBinary.substring(0, cidr).padEnd(32, "0");
-    const broadcastBinary = ipBinary.substring(0, cidr).padEnd(32, "1");
+    const ipBin = ip.split(".").map(o => parseInt(o).toString(2).padStart(8, "0")).join("");
+    const networkBin = ipBin.substring(0, cidr).padEnd(32, "0");
+    const broadcastBin = ipBin.substring(0, cidr).padEnd(32, "1");
 
-    const networkIP = binaryToIP(networkBinary);
-    const broadcastIP = binaryToIP(broadcastBinary);
+    const network = binToIP(networkBin);
+    const broadcast = binToIP(broadcastBin);
     const totalHosts = Math.pow(2, 32 - cidr) - 2;
+    const firstHost = binToIP((BigInt("0b"+networkBin)+1n).toString(2).padStart(32,"0"));
+    const lastHost = binToIP((BigInt("0b"+broadcastBin)-1n).toString(2).padStart(32,"0"));
 
-    const firstHost = binaryToIP((BigInt("0b" + networkBinary) + 1n).toString(2).padStart(32, "0"));
-    const lastHost = binaryToIP((BigInt("0b" + broadcastBinary) - 1n).toString(2).padStart(32, "0"));
-
-    outputDiv.innerHTML = `
-        <div class="result">
-            <p><strong>Network ID:</strong> ${networkIP}</p>
-            <p><strong>Broadcast Address:</strong> ${broadcastIP}</p>
-            <p><strong>First Host:</strong> ${firstHost}</p>
-            <p><strong>Last Host:</strong> ${lastHost}</p>
-            <p><strong>Total Hosts:</strong> ${totalHosts.toLocaleString()}</p>
-            <p><strong>CIDR:</strong> /${cidr}</p>
-        </div>
+    resultDiv.innerHTML = `
+        <p><strong>Network Address:</strong> ${network}</p>
+        <p><strong>Broadcast Address:</strong> ${broadcast}</p>
+        <p><strong>Usable Hosts:</strong> ${totalHosts}</p>
+        <p><strong>Host Range:</strong> ${firstHost} - ${lastHost}</p>
+        <p><strong>CIDR:</strong> /${cidr}</p>
     `;
 }
 
-function binaryToIP(binaryStr) {
-    return binaryStr.match(/.{8}/g).map(b => parseInt(b, 2)).join(".");
+function binToIP(bin) {
+    return bin.match(/.{8}/g).map(b => parseInt(b,2)).join(".");
 }
