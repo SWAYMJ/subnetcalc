@@ -1,68 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>IP Subnet Calculator</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f8;
-            text-align: center;
-            margin-top: 50px;
-        }
-        form {
-            background: white;
-            padding: 20px;
-            display: inline-block;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        input {
-            padding: 8px;
-            margin: 8px;
-            width: 200px;
-        }
-        button {
-            padding: 8px 16px;
-            cursor: pointer;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-        }
-        .result {
-            margin-top: 30px;
-            background: white;
-            display: inline-block;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            text-align: left;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IP Subnet Calculator</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>IP Subnet Calculator</h1>
-    <form method="POST">
-        <input type="text" name="ip" placeholder="Enter IP address (e.g. 192.168.1.10)" required>
-        <input type="text" name="mask" placeholder="Enter subnet mask (e.g. /24 or 255.255.255.0)" required>
-        <br>
-        <button type="submit">Calculate</button>
-    </form>
-
-    {% if result %}
-        {% if result.error %}
-            <p style="color:red;">{{ result.error }}</p>
-        {% else %}
-            <div class="result">
-                <h3>Results</h3>
-                <p><strong>Network Address:</strong> {{ result.network }}</p>
-                <p><strong>Broadcast Address:</strong> {{ result.broadcast }}</p>
-                <p><strong>Usable Host Range:</strong> {{ result.range }}</p>
-                <p><strong>Number of Hosts:</strong> {{ result.hosts }}</p>
-                <p><strong>CIDR Notation:</strong> {{ result.cidr }}</p>
-            </div>
-        {% endif %}
-    {% endif %}
+<div class="container">
+    <h1>🌐 IP Subnet Calculator</h1>
+    <input type="text" id="ip" placeholder="IP address e.g. 192.168.1.10">
+    <input type="text" id="mask" placeholder="Subnet mask e.g. 255.255.255.0 or /24">
+    <button onclick="calculate()">Calculate</button>
+    <div id="result"></div>
+</div>
+<script src="script.js"></script>
 </body>
 </html>
